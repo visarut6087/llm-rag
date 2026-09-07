@@ -1,0 +1,19 @@
+configuration,error,item_id
+baseline_rag,<urlopen error [Errno 61] Connection refused>,llm-001
+reranking,<urlopen error [Errno 61] Connection refused>,llm-001
+conversation_memory,<urlopen error [Errno 61] Connection refused>,llm-001
+baseline_rag,<urlopen error [Errno 61] Connection refused>,llm-002
+reranking,<urlopen error [Errno 61] Connection refused>,llm-002
+conversation_memory,<urlopen error [Errno 61] Connection refused>,llm-002
+baseline_rag,<urlopen error [Errno 61] Connection refused>,llm-003
+reranking,<urlopen error [Errno 61] Connection refused>,llm-003
+conversation_memory,<urlopen error [Errno 61] Connection refused>,llm-003
+baseline_rag,<urlopen error [Errno 61] Connection refused>,llm-004
+reranking,<urlopen error [Errno 61] Connection refused>,llm-004
+conversation_memory,<urlopen error [Errno 61] Connection refused>,llm-004
+baseline_rag,<urlopen error [Errno 61] Connection refused>,llm-005
+reranking,<urlopen error [Errno 61] Connection refused>,llm-005
+conversation_memory,<urlopen error [Errno 61] Connection refused>,llm-005
+baseline_rag,<urlopen error [Errno 61] Connection refused>,llm-006
+reranking,<urlopen error [Errno 61] Connection refused>,llm-006
+conversation_memory,<urlopen error [Errno 61] Connection refused>,llm-006

@@ -1,0 +1,88 @@
+{
+  "dataset_name": "thai_sarabun_llm_eval_v1",
+  "annotation_status": "manually_annotated_from_backend/dataset/sarabun 26.txt",
+  "source_name": "sarabun 26.txt",
+  "items": [
+    {
+      "id": "llm-001",
+      "question": "หนังสือมีทั้งหมดกี่ชนิดตามระเบียบงานสารบรรณ",
+      "expected_answer": "หนังสือมี ๖ ชนิด ได้แก่ หนังสือภายนอก หนังสือภายใน หนังสือประทับตรา หนังสือสั่งการ หนังสือประชาสัมพันธ์ และหนังสือที่เจ้าหน้าที่ทำขึ้นหรือรับไว้เป็นหลักฐานในราชการ",
+      "answerable": true,
+      "relevant_source": "sarabun 26.txt",
+      "relevant_chunk": "sarabun 26.txt#chunk-12",
+      "question_type": "answerable_specific_source",
+      "multi_turn": false,
+      "ambiguous": false,
+      "abstention_required": false,
+      "annotation_note": "The answer is stated in ข้อ ๑๐."
+    },
+    {
+      "id": "llm-002",
+      "question": "หนังสือด่วนที่สุดต้องดำเนินการอย่างไร",
+      "expected_answer": "ให้เจ้าหน้าที่ปฏิบัติในทันทีที่ได้รับหนังสือนั้น",
+      "answerable": true,
+      "relevant_source": "sarabun 26.txt",
+      "relevant_chunk": "sarabun 26.txt#chunk-20",
+      "question_type": "answerable_specific_source",
+      "multi_turn": false,
+      "ambiguous": false,
+      "abstention_required": false,
+      "annotation_note": "The answer is stated in ข้อ ๒๘.๑."
+    },
+    {
+      "id": "llm-003",
+      "question": "โดยปกติหนังสือราชการมีอายุการเก็บรักษาไม่น้อยกว่ากี่ปี",
+      "expected_answer": "ไม่น้อยกว่า ๑๐ ปี",
+      "answerable": true,
+      "relevant_source": "sarabun 26.txt",
+      "relevant_chunk": "sarabun 26.txt#chunk-33",
+      "question_type": "answerable_specific_source",
+      "multi_turn": false,
+      "ambiguous": false,
+      "abstention_required": false,
+      "annotation_note": "The answer is stated in ข้อ ๕๗."
+    },
+    {
+      "id": "llm-004",
+      "question": "แล้วเรื่องนี้ต้องเก็บหนังสือไว้นานเท่าไหร่",
+      "expected_answer": "โดยปกติให้เก็บหนังสือไว้ไม่น้อยกว่า ๑๐ ปี",
+      "answerable": true,
+      "relevant_source": "sarabun 26.txt",
+      "relevant_chunk": "sarabun 26.txt#chunk-33",
+      "question_type": "multi_turn_follow_up",
+      "multi_turn": true,
+      "ambiguous": true,
+      "conversation_context": [
+        {"role": "user", "content": "ระเบียบงานสารบรรณกำหนดอายุการเก็บหนังสือไว้อย่างไร"}
+      ],
+      "abstention_required": false,
+      "annotation_note": "The follow-up is intentionally incomplete; context resolves เรื่องนี้ to the preceding user topic."
+    },
+    {
+      "id": "llm-005",
+      "question": "การเก็บหนังสืออิเล็กทรอนิกส์ต้องสำรองข้อมูลอย่างไร",
+      "expected_answer": "ต้องสำรองข้อมูลไว้อีกแห่งเป็นอย่างน้อย ในรูปแบบมาตรฐาน เช่น PDF ความละเอียดไม่น้อยกว่า ๑๕๐ dpi",
+      "answerable": true,
+      "relevant_source": "sarabun 26.txt",
+      "relevant_chunk": "sarabun 26.txt#chunk-40",
+      "question_type": "answerable_specific_source",
+      "multi_turn": false,
+      "ambiguous": false,
+      "abstention_required": false,
+      "annotation_note": "The answer is stated in ข้อ ๘๙/๔."
+    },
+    {
+      "id": "llm-006",
+      "question": "ระเบียบนี้กำหนดชื่อผู้ชนะรางวัลโนเบลปี ๒๕๖๔ ว่าเป็นใคร",
+      "expected_answer": "ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล",
+      "answerable": false,
+      "relevant_source": null,
+      "relevant_chunk": null,
+      "question_type": "unanswerable",
+      "multi_turn": false,
+      "ambiguous": false,
+      "abstention_required": true,
+      "annotation_note": "The supplied Thai article does not contain this fact."
+    }
+  ]
+}

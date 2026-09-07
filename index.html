@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ollama Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="src/style.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ─────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <button class="new-chat-btn" id="new-chat-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        แชทใหม่
+      </button>
+    </div>
+
+    <div class="sidebar-chats">
+      <p class="sidebar-label">ประวัติ</p>
+      <div id="chat-list"></div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="conn-badge" id="conn-badge">
+        <span class="conn-dot offline" id="conn-dot"></span>
+        <span id="conn-text">กำลังตรวจสอบ...</span>
+        <button class="icon-btn" id="refresh-conn-btn" title="รีเฟรช">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+      </div>
+      <button class="sidebar-action-btn" id="settings-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        ตั้งค่า
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ──────────────────────────── -->
+  <div class="main" id="main">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" id="toggle-sidebar-btn" title="ซ่อน/แสดง Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="logo">
+          <div class="logo-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C12 7.523 7.523 12 2 12C7.523 12 12 16.477 12 22C12 16.477 16.477 12 22 12C16.477 12 12 7.523 12 2Z" fill="url(#g1)"/>
+              <defs>
+                <linearGradient id="g1" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#818cf8"/>
+                  <stop offset="1" stop-color="#c084fc"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span class="logo-text">Ollama Chat</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="model-picker">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <select id="model-select">
+            <option value="" disabled selected>ไม่พบโมเดล</option>
+          </select>
+          <button class="icon-btn" id="refresh-models-btn" title="รีโหลดโมเดล">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+        </div>
+        <button class="pull-btn" id="kb-btn" title="จัดการคลังความรู้ ChromaDB">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          คลังความรู้ (RAG)
+        </button>
+        <button class="pull-btn" id="pull-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          ดึงโมเดล
+        </button>
+      </div>
+    </header>
+
+    <!-- Chat Area -->
+    <div class="chat-area" id="chat-area">
+
+      <!-- Welcome -->
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C12 7.523 7.523 12 2 12C7.523 12 12 16.477 12 22C12 16.477 16.477 12 22 12C16.477 12 12 7.523 12 2Z" fill="url(#g2)"/>
+            <defs>
+              <linearGradient id="g2" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#818cf8"/>
+                <stop offset="1" stop-color="#c084fc"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h1 class="welcome-title">สวัสดีครับ 👋</h1>
+        <p class="welcome-sub">เริ่มต้นการสนทนากับ AI บนเครื่องของคุณ (รองรับ Multimodal RAG + Web Search)</p>
+
+        <div class="suggestions">
+          <button class="suggestion" data-prompt="ช่วยอธิบาย Machine Learning ให้เข้าใจง่ายๆ เป็นภาษาไทย">🤖 อธิบาย Machine Learning ให้เข้าใจง่าย</button>
+          <button class="suggestion" data-prompt="เขียนโค้ด Python สร้าง REST API ง่ายๆ พร้อมอธิบาย">🐍 เขียนโค้ด Python REST API</button>
+          <button class="suggestion" data-prompt="ช่วยแปลประโยคนี้เป็นภาษาอังกฤษ: ขอบคุณมากครับ ยินดีที่ได้รู้จัก">🌐 แปลภาษาไทย → อังกฤษ</button>
+          <button class="suggestion" data-prompt="ช่วยสรุปวิธีการทำสมาธิสั้นๆ 5 ข้อ เป็นภาษาไทย">🧘 วิธีทำสมาธิ 5 ข้อ</button>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages" id="messages"></div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-bar">
+      <div class="input-box" id="input-box">
+        <textarea id="user-input" placeholder="พิมพ์ข้อความที่นี่... (Enter ส่ง, Shift+Enter ขึ้นบรรทัดใหม่)" rows="1"></textarea>
+        <div class="input-actions">
+          <button class="rag-toggle" id="rag-toggle" title="เปิด/ปิด Multimodal RAG (ChromaDB)" type="button">
+            🧠
+          </button>
+          <button class="web-search-toggle" id="web-search-toggle" title="ค้นหาอินเทอร์เน็ต" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </button>
+          <button class="send-btn" id="send-btn">
+            <svg class="send-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <svg class="stop-icon hidden" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+          </button>
+        </div>
+      </div>
+      <p class="input-note">AI อาจมีข้อผิดพลาด กรุณาตรวจสอบข้อมูลสำคัญเสมอ</p>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- ── SETTINGS MODAL ───────────────────── -->
+<div class="modal-bg hidden" id="settings-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>⚙️ ตั้งค่า</h2>
+      <button class="icon-btn" id="close-settings-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <label>Ollama Host URL<input type="text" id="host-input" placeholder="http://localhost:11434"/></label>
+      <label>System Prompt<textarea id="sysprompt-input" rows="3" placeholder="คุณคือผู้ช่วย AI ที่เป็นกันเอง..."></textarea></label>
+      <div class="modal-row">
+        <label>Temperature: <b id="temp-label">0.7</b><input type="range" id="temp-input" min="0" max="1" step="0.05" value="0.7"/></label>
+        <label>Context<select id="ctx-input">
+          <option value="2048">2 K</option>
+          <option value="4096" selected>4 K</option>
+          <option value="8192">8 K</option>
+          <option value="16384">16 K</option>
+          <option value="32768">32 K</option>
+        </select></label>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="cancel-settings-btn">ยกเลิก</button>
+      <button class="btn-primary" id="save-settings-btn">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PULL MODAL ───────────────────────── -->
+<div class="modal-bg hidden" id="pull-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>⬇️ ดึงโมเดล</h2>
+      <button class="icon-btn" id="close-pull-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-hint">เลือกโมเดลด้านล่าง หรือพิมพ์ชื่อโมเดลเอง</p>
+      <div class="preset-chips">
+        <button class="chip selected" data-model="qwen2.5:7b">qwen2.5:7b<span>4.7 GB</span></button>
+        <button class="chip" data-model="qwen-3.8b">qwen-3.8b<span>1.9 GB</span></button>
+        <button class="chip" data-model="gemma-4-e4b">gemma-4-e4b<span>3.3 GB</span></button>
+        <button class="chip" data-model="gemma3:4b">gemma3:4b<span>3.3 GB</span></button>
+        <button class="chip" data-model="llama3.2:3b">llama3.2:3b<span>2 GB</span></button>
+        <button class="chip" data-model="deepseek-r1:7b">deepseek-r1:7b<span>4.7 GB</span></button>
+        <button class="chip" data-model="mistral">mistral:7b<span>4.1 GB</span></button>
+        <button class="chip" data-model="phi4-mini">phi4-mini<span>2.5 GB</span></button>
+      </div>
+      <label>ชื่อโมเดล<input type="text" id="pull-name-input" placeholder="เช่น qwen2.5:7b"/></label>
+      <div class="pull-progress hidden" id="pull-progress">
+        <div class="progress-status" id="progress-status">กำลังดาวน์โหลด...</div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-pct" id="progress-pct">0%</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="cancel-pull-btn">ยกเลิก</button>
+      <button class="btn-primary" id="start-pull-btn">ดึงโมเดล</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── KB (RAG) MODAL ───────────────────────── -->
+<div class="modal-backdrop hidden" id="kb-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">🧠 คลังความรู้ Multimodal RAG (ChromaDB)</span>
+      <button class="icon-btn" id="close-kb-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 12px; font-size: 13px; color: #a1a1aa;">
+        สถิติปัจจุบัน: <strong id="kb-text-count" style="color:#6366f1;">0</strong> ข้อความ, <strong id="kb-img-count" style="color:#c084fc;">0</strong> รูปภาพ ใน ChromaDB
+      </div>
+      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <button class="chip active" id="kb-tab-text" style="flex:1; justify-content:center;">📄 อัปโหลดข้อความ/เอกสาร</button>
+        <button class="chip" id="kb-tab-image" style="flex:1; justify-content:center;">🖼️ อัปโหลดรูปภาพ (ViT)</button>
+      </div>
+
+      <!-- Text Section -->
+      <div id="kb-sec-text">
+        <label>เพิ่มข้อความเข้าคลังความรู้
+          <textarea id="kb-text-input" rows="5" placeholder="พิมพ์หรือวางเนื้อหาเอกสารที่นี่..."></textarea>
+        </label>
+        <button class="btn-primary" id="kb-save-text-btn" style="margin-top: 8px; width: 100%;">บันทึกเข้า ChromaDB</button>
+      </div>
+
+      <!-- Image Section -->
+      <div id="kb-sec-image" class="hidden">
+        <label>เลือกรูปภาพส่งเข้า ViT / CLIP Vector Space
+          <input type="file" id="kb-image-input" accept="image/*" style="margin-top: 8px; width:100%;" />
+        </label>
+        <button class="btn-primary" id="kb-save-image-btn" style="margin-top: 12px; width: 100%;">ประมวลผลด้วย ViT และบันทึกเข้า ChromaDB</button>
+      </div>
+      
+      <div id="kb-status-msg" style="margin-top: 10px; font-size: 13px; color: #818cf8; text-align: center;"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

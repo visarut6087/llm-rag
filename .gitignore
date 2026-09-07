@@ -1,0 +1,18 @@
+.venv/
+node_modules/
+dist/
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# Local model files
+*.gguf
+
+# Local vector database/runtime state
+backend/chroma_db/
+
+# Local logs and temporary files
+*.log
+.env
+.env.*
+!.env.example

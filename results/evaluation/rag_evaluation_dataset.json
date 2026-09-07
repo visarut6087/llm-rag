@@ -1,0 +1,64 @@
+{
+  "dataset_name": "thai_sarabun_manual_v1",
+  "annotation_status": "manually_annotated_from_backend/dataset/sarabun 26.txt",
+  "source_name": "sarabun 26.txt",
+  "items": [
+    {
+      "id": "sr-001",
+      "question": "หนังสือมีทั้งหมดกี่ชนิดตามระเบียบงานสารบรรณ",
+      "expected_answer": "หนังสือมี ๖ ชนิด ได้แก่ หนังสือภายนอก หนังสือภายใน หนังสือประทับตรา หนังสือสั่งการ หนังสือประชาสัมพันธ์ และหนังสือที่เจ้าหน้าที่ทำขึ้นหรือรับไว้เป็นหลักฐานในราชการ",
+      "relevant_source": "sarabun 26.txt",
+      "relevant_chunk": "sarabun 26.txt#chunk-12",
+      "answerable": true,
+      "annotation_note": "The answer is stated in ข้อ ๑๐."
+    },
+    {
+      "id": "sr-002",
+      "question": "หนังสือด่วนที่สุดต้องดำเนินการอย่างไร",
+      "expected_answer": "ให้เจ้าหน้าที่ปฏิบัติในทันทีที่ได้รับหนังสือนั้น",
+      "relevant_source": "sarabun 26.txt",
+      "relevant_chunk": "sarabun 26.txt#chunk-20",
+      "answerable": true,
+      "annotation_note": "The answer is stated in ข้อ ๒๘.๑."
+    },
+    {
+      "id": "sr-003",
+      "question": "โดยปกติหนังสือราชการมีอายุการเก็บรักษาไม่น้อยกว่ากี่ปี",
+      "expected_answer": "ไม่น้อยกว่า ๑๐ ปี",
+      "relevant_source": "sarabun 26.txt",
+      "relevant_chunk": "sarabun 26.txt#chunk-33",
+      "answerable": true,
+      "annotation_note": "The answer is stated in ข้อ ๕๗."
+    },
+    {
+      "id": "sr-004",
+      "question": "การเก็บหนังสืออิเล็กทรอนิกส์ต้องสำรองข้อมูลอย่างไร",
+      "expected_answer": "ต้องสำรองข้อมูลไว้อีกแห่งเป็นอย่างน้อย ในรูปแบบมาตรฐาน เช่น PDF ความละเอียดไม่น้อยกว่า ๑๕๐ dpi",
+      "relevant_source": "sarabun 26.txt",
+      "relevant_chunk": "sarabun 26.txt#chunk-40",
+      "answerable": true,
+      "annotation_note": "The answer is stated in ข้อ ๘๙/๔."
+    },
+    {
+      "id": "sr-005",
+      "question": "แล้วเรื่องนี้ต้องเก็บหนังสือไว้นานเท่าไหร่",
+      "expected_answer": "โดยปกติให้เก็บหนังสือไว้ไม่น้อยกว่า ๑๐ ปี",
+      "relevant_source": "sarabun 26.txt",
+      "relevant_chunk": "sarabun 26.txt#chunk-33",
+      "answerable": true,
+      "conversation_context": [
+        {"role": "user", "content": "ระเบียบงานสารบรรณกำหนดอายุการเก็บหนังสือไว้อย่างไร"}
+      ],
+      "annotation_note": "Follow-up annotation resolves เรื่องนี้ to the immediately preceding user topic; the answer is in ข้อ ๕๗."
+    },
+    {
+      "id": "sr-006",
+      "question": "ระเบียบนี้กำหนดชื่อผู้ชนะรางวัลโนเบลปี ๒๕๖๔ ว่าเป็นใคร",
+      "expected_answer": "ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล",
+      "relevant_source": null,
+      "relevant_chunk": null,
+      "answerable": false,
+      "annotation_note": "The supplied Thai article is about government document administration and does not contain this fact."
+    }
+  ]
+}

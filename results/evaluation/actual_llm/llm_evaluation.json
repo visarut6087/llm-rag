@@ -1,0 +1,458 @@
+{
+  "status": "completed",
+  "dataset": "thai_sarabun_llm_eval_v1",
+  "annotation_status": "manually_annotated_from_backend/dataset/sarabun 26.txt",
+  "judge_model": "qwen2.5:7b",
+  "metrics": [
+    "faithfulness",
+    "answer_relevance",
+    "context_relevance",
+    "citation_correctness",
+    "hallucination_rate",
+    "abstention_correctness"
+  ],
+  "rows": [
+    {
+      "item_id": "llm-001",
+      "configuration": "baseline_rag",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "ตามระเบียบงานสารบรรณที่ระบุในข้อมูล [S1] หนังสือมีทั้งหมด 6 ชนิด คือ\n\n1. หนังสือภายนอก\n2. หนังสือภายใน\n3. หนังสือประทับตรา\n4. หนังสือสั่งการ\n5. หนังสือประชาสัมพันธ์\n6. หนังสือที่เจ้าหน้าที่ทำขึ้น หรือรับไว้เป็นหลักฐานในราชการ\n\n[citation: [S1]]",
+      "citations_found": [
+        "S1"
+      ],
+      "known_citations": [
+        "S1"
+      ],
+      "expected_source_cited": true,
+      "faithfulness": 1,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 0,
+      "abstention_correctness": 1,
+      "rationale": "คำตอบตรงกับข้อมูลในแหล่งข้อมูลที่ให้มา และได้ระบุ citation อย่างถูกต้อง",
+      "retrieval_latency_ms": 21.429,
+      "reranking_latency_ms": 0.004,
+      "query_rewrite_latency_ms": 0.055
+    },
+    {
+      "item_id": "llm-001",
+      "configuration": "reranking",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "ตามระเบียบงานสารบรรณที่ระบุในข้อมูล [S3] หนังสือมีทั้งหมด 6 ชนิด ซึ่งประกอบด้วย:\n\n1. หนังสือภายนอก [S3]\n2. หนังสือภายใน [S3]\n3. หนังสือประทับตรา [S3]\n4. หนังสือสั่งการ [S3]\n5. หนังสือประชาสัมพันธ์ [S3]\n6. หนังสือที่เจ้าหน้าที่ทำขึ้น หรือรับไว้เป็นหลักฐานในราชการ [S3]\n\ncitation: [S3]",
+      "citations_found": [
+        "S3"
+      ],
+      "known_citations": [
+        "S3"
+      ],
+      "expected_source_cited": true,
+      "faithfulness": 1,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 0,
+      "abstention_correctness": 1,
+      "rationale": "คำตอบตรงกับข้อมูลในแหล่งข้อมูลที่ให้มา และได้ระบุ citation อย่างถูกต้อง",
+      "retrieval_latency_ms": 4.683,
+      "reranking_latency_ms": 0.895,
+      "query_rewrite_latency_ms": 0.019
+    },
+    {
+      "item_id": "llm-001",
+      "configuration": "conversation_memory",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "ตามระเบียบงานสารบรรณที่ระบุในข้อมูล [S3] หนังสือมีทั้งหมด 6 ชนิด ซึ่งประกอบด้วย:\n\n1. หนังสือภายนอก [S3]\n2. หนังสือภายใน [S3]\n3. หนังสือประทับตรา [S3]\n4. หนังสือสั่งการ [S3]\n5. หนังสือประชาสัมพันธ์ [S3]\n6. หนังสือที่เจ้าหน้าที่ทำขึ้น หรือรับไว้เป็นหลักฐานในราชการ [S3]\n\ncitation: [S3]",
+      "citations_found": [
+        "S3"
+      ],
+      "known_citations": [
+        "S3"
+      ],
+      "expected_source_cited": true,
+      "faithfulness": 1,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 0,
+      "abstention_correctness": 1,
+      "rationale": "คำตอบตรงกับข้อมูลในแหล่งข้อมูลที่ให้มา และได้ระบุ citation อย่างถูกต้อง",
+      "retrieval_latency_ms": 4.506,
+      "reranking_latency_ms": 0.817,
+      "query_rewrite_latency_ms": 0.031
+    },
+    {
+      "item_id": "llm-002",
+      "configuration": "baseline_rag",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "หนังสือด่วนที่สุดต้องดำเนินการให้เร็วกว่าปกติ [S1] โดยเจ้าหน้าที่ต้องปฏิบัติในทันทีที่ได้รับหนังสือ [S1] ตามข้อ ๒๘.๑ ของเอกสาร [S1]",
+      "citations_found": [
+        "S1"
+      ],
+      "known_citations": [
+        "S1"
+      ],
+      "expected_source_cited": true,
+      "faithfulness": 1,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 0,
+      "abstention_correctness": 1,
+      "rationale": "คำตอบตรงกับข้อกำหนดในเอกสารที่ให้มา โดยระบุว่าหนังสือด่วนที่สุดต้องดำเนินการให้เร็วกว่าปกติ และเจ้าหน้าที่ต้องปฏิบัติในทันทีที่ได้รับหนังสือ ซึ่งตรงกับข้อ 28.1 ของเอกสาร [S1]",
+      "retrieval_latency_ms": 1.928,
+      "reranking_latency_ms": 0.005,
+      "query_rewrite_latency_ms": 0.106
+    },
+    {
+      "item_id": "llm-002",
+      "configuration": "reranking",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "หนังสือด่วนที่สุดต้องดำเนินการตามข้อ [S2] ซึ่งระบุว่า \"ด่วนที่สุด - ให้เจ้าหน้าที่ปฏิบัติในทันทีที่ได้รับหนังสือนั้น\" [S2]\n\nดังนั้น หนังสือด่วนที่สุดต้องดำเนินการในทันทีที่ได้รับ.",
+      "citations_found": [
+        "S2"
+      ],
+      "known_citations": [
+        "S2"
+      ],
+      "expected_source_cited": false,
+      "faithfulness": 1,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 0,
+      "abstention_correctness": 1,
+      "rationale": "คำตอบตรงกับข้อกำหนดของหนังสือด่วนที่สุดตามข้อมูลที่ให้มา และได้ระบุ citation อย่างถูกต้อง",
+      "retrieval_latency_ms": 4.774,
+      "reranking_latency_ms": 0.899,
+      "query_rewrite_latency_ms": 0.122
+    },
+    {
+      "item_id": "llm-002",
+      "configuration": "conversation_memory",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "หนังสือด่วนที่สุดต้องดำเนินการตามข้อ [S2] ซึ่งระบุว่า \"ด่วนที่สุด - ให้เจ้าหน้าที่ปฏิบัติในทันทีที่ได้รับหนังสือนั้น\" [S2]\n\nดังนั้น หนังสือด่วนที่สุดต้องดำเนินการในทันทีที่ได้รับ.",
+      "citations_found": [
+        "S2"
+      ],
+      "known_citations": [
+        "S2"
+      ],
+      "expected_source_cited": false,
+      "faithfulness": 1,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 0,
+      "abstention_correctness": 1,
+      "rationale": "คำตอบตรงกับข้อกำหนดของหนังสือด่วนที่สุดตามข้อมูลที่ให้มา และได้ระบุ citation อย่างถูกต้อง",
+      "retrieval_latency_ms": 2.169,
+      "reranking_latency_ms": 0.986,
+      "query_rewrite_latency_ms": 0.066
+    },
+    {
+      "item_id": "llm-003",
+      "configuration": "baseline_rag",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "โดยปกติหนังสือราชการมีอายุการเก็บรักษาไม่น้อยกว่า 10 ปี [S1] ตามข้อ ๕๗ ในเอกสารที่ให้มา.",
+      "citations_found": [
+        "S1"
+      ],
+      "known_citations": [
+        "S1"
+      ],
+      "expected_source_cited": true,
+      "faithfulness": 1,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 0,
+      "abstention_correctness": 1,
+      "rationale": "คำตอบตรงกับข้อเท็จจริงในแหล่งข้อมูลที่ให้มา และได้ระบุ citation อย่างถูกต้อง",
+      "retrieval_latency_ms": 1.664,
+      "reranking_latency_ms": 0.002,
+      "query_rewrite_latency_ms": 0.053
+    },
+    {
+      "item_id": "llm-003",
+      "configuration": "reranking",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล\n\nข้อมูลที่มีอยู่ไม่ได้ระบุอายุการเก็บรักษาหนังสือราชการอย่างชัดเจน ทั้งนี้ ข้อมูลบางส่วนระบุว่าหนังสืออิเล็กทรอนิกส์ไม่มีอายุการเก็บหนังสือ โดยปกติให้เก็บไว้ตลอดไป [S1] แต่ไม่ได้ระบุอายุการเก็บรักษาสำหรับหนังสือราชการทั่วไป",
+      "citations_found": [
+        "S1"
+      ],
+      "known_citations": [
+        "S1"
+      ],
+      "expected_source_cited": false,
+      "faithfulness": 0,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 1,
+      "abstention_correctness": 0,
+      "rationale": "คำตอบไม่ถูกต้องเนื่องจากไม่มีข้อมูลที่ระบุอายุการเก็บรักษาหนังสือราชการอย่างชัดเจนในแหล่งข้อมูลที่มี แม้ว่าจะระบุว่าหนังสืออิเล็กทรอนิกส์ไม่มีอายุการเก็บหนังสือ แต่ไม่มีข้อมูลเกี่ยวกับหนังสือราชการทั่วไป",
+      "retrieval_latency_ms": 4.639,
+      "reranking_latency_ms": 1.067,
+      "query_rewrite_latency_ms": 0.006
+    },
+    {
+      "item_id": "llm-003",
+      "configuration": "conversation_memory",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล\n\nข้อมูลที่มีอยู่ไม่ได้ระบุอายุการเก็บรักษาหนังสือราชการอย่างชัดเจน ทั้งนี้ ข้อมูลบางส่วนระบุว่าหนังสืออิเล็กทรอนิกส์ไม่มีอายุการเก็บหนังสือ โดยปกติให้เก็บไว้ตลอดไป [S1] แต่ไม่ได้ระบุอายุการเก็บรักษาสำหรับหนังสือราชการทั่วไป",
+      "citations_found": [
+        "S1"
+      ],
+      "known_citations": [
+        "S1"
+      ],
+      "expected_source_cited": false,
+      "faithfulness": 0,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 1,
+      "abstention_correctness": 0,
+      "rationale": "คำตอบไม่ถูกต้องเนื่องจากไม่มีข้อมูลที่ระบุอายุการเก็บรักษาหนังสือราชการอย่างชัดเจนในแหล่งข้อมูลที่มี แม้ว่าจะระบุว่าหนังสืออิเล็กทรอนิกส์ไม่มีอายุการเก็บหนังสือ แต่ไม่มีข้อมูลเกี่ยวกับหนังสือราชการทั่วไป",
+      "retrieval_latency_ms": 4.536,
+      "reranking_latency_ms": 0.993,
+      "query_rewrite_latency_ms": 0.139
+    },
+    {
+      "item_id": "llm-004",
+      "configuration": "baseline_rag",
+      "answerable": true,
+      "question_type": "multi_turn_follow_up",
+      "generated_answer": "ตามข้อมูลที่ให้มา [S1] ระบุว่าอายุการเก็บหนังสือโดยปกติให้เก็บไว้ไม่น้อยกว่า 10 ปี แต่ยังระบุว่ามีข้อยกเว้นสำหรับหนังสือที่ต้องสงวนเป็นความลับ หนังสือที่เป็นหลักฐานทางอรรถคดี สำนวนศาล หรือพนักงานสอบสวน หนังสือที่มีคุณค่าทางประวัติศาสตร์ (เก็บไว้ตลอดไป) คู่สำเนาที่มีต้นเรื่องค้นได้จากที่อื่น (ไม่น้อยกว่า 5 ปี) และเรื่องธรรมดาสามัญ (ไม่น้อยกว่า 1 ปี) หรือเอกสารเกี่ยวกับการเงิน (ไม่น้อยกว่า 5 ปี หรือปฏิบัติตามความตกลงกับกระทรวงการคลัง) [S1] \n\nดังนั้น คำตอบสำหรับคำถามว่า \"แล้วเรื่องนี้ต้องเก็บหนังสือไว้นานเท่าไหร่\" คือ **ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล** เนื่องจากข้อมูลไม่ได้ระบุเรื่องเฉพาะที่ต้องการทราบ แต่ระบุเพียงเกณฑ์ทั่วไปสำหรับการเก็บรักษาหนังสือ [S1]",
+      "citations_found": [
+        "S1"
+      ],
+      "known_citations": [
+        "S1"
+      ],
+      "expected_source_cited": true,
+      "faithfulness": 0,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 1,
+      "abstention_correctness": 0,
+      "rationale": "คำตอบไม่ถูกต้องเนื่องจากไม่ได้ระบุอายุการเก็บหนังสือสำหรับเรื่องเฉพาะที่ถาม แต่ระบุเพียงเกณฑ์ทั่วไปสำหรับการเก็บรักษาหนังสือ",
+      "retrieval_latency_ms": 1.336,
+      "reranking_latency_ms": 0.002,
+      "query_rewrite_latency_ms": 0.023
+    },
+    {
+      "item_id": "llm-004",
+      "configuration": "reranking",
+      "answerable": true,
+      "question_type": "multi_turn_follow_up",
+      "generated_answer": "ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล\n\nข้อมูลที่มีอยู่ไม่ได้ระบุระยะเวลาที่ควรเก็บหนังสือไว้ แต่ระบุเพียงเกี่ยวกับการเก็บรักษาหนังสือและทะเบียนหนังสือ [S3] และการเก็บสำเนาหนังสือ [S2] แต่ไม่ได้ระบุระยะเวลาการเก็บรักษาอย่างชัดเจน",
+      "citations_found": [
+        "S2",
+        "S3"
+      ],
+      "known_citations": [
+        "S2",
+        "S3"
+      ],
+      "expected_source_cited": false,
+      "faithfulness": 0,
+      "answer_relevance": 0,
+      "context_relevance": 0,
+      "citation_correctness": 1,
+      "hallucination_rate": 1,
+      "abstention_correctness": 0,
+      "rationale": "คำตอบไม่ตรงกับข้อมูลที่มี และไม่ระบุระยะเวลาการเก็บรักษาหนังสืออย่างชัดเจน ทำให้ไม่สามารถให้คะแนนว่าผ่านในด้าน faithfulness, answer_relevance, และ context_relevance",
+      "retrieval_latency_ms": 3.727,
+      "reranking_latency_ms": 0.605,
+      "query_rewrite_latency_ms": 0.091
+    },
+    {
+      "item_id": "llm-004",
+      "configuration": "conversation_memory",
+      "answerable": true,
+      "question_type": "multi_turn_follow_up",
+      "generated_answer": "ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล\n\nข้อมูลที่มีอยู่ไม่ได้ระบุระยะเวลาที่ควรเก็บหนังสือไว้ แต่เฉพาะเกี่ยวกับการเก็บสำเนาหนังสือที่จัดทำขึ้น [S1] และการเก็บหนังสืออิเล็กทรอนิกส์ [S3] ซึ่งไม่ได้ระบุระยะเวลาการเก็บข้อมูลอย่างชัดเจน",
+      "citations_found": [
+        "S1",
+        "S3"
+      ],
+      "known_citations": [
+        "S1",
+        "S3"
+      ],
+      "expected_source_cited": false,
+      "faithfulness": 0,
+      "answer_relevance": 0,
+      "context_relevance": 0,
+      "citation_correctness": 1,
+      "hallucination_rate": 1,
+      "abstention_correctness": 0,
+      "rationale": "คำตอบไม่ตรงกับคำถามที่ถาม และไม่มีข้อมูลที่เพียงพอจากแหล่งข้อมูลที่ให้มาในการตอบคำถามเกี่ยวกับระยะเวลาที่ควรเก็บหนังสือไว้",
+      "retrieval_latency_ms": 1.393,
+      "reranking_latency_ms": 0.677,
+      "query_rewrite_latency_ms": 0.08
+    },
+    {
+      "item_id": "llm-005",
+      "configuration": "baseline_rag",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "การเก็บหนังสืออิเล็กทรอนิกส์ต้องสำรองข้อมูล (Backup) ไว้อีกแห่งเป็นอย่างน้อย ในรูปแบบมาตรฐาน เช่น PDF ความละเอียดไม่น้อยกว่า ๑๕๐ dpi [S1]",
+      "citations_found": [
+        "S1"
+      ],
+      "known_citations": [
+        "S1"
+      ],
+      "expected_source_cited": true,
+      "faithfulness": 1,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 0,
+      "abstention_correctness": 0,
+      "rationale": "คำตอบตรงกับข้อกำหนดในแหล่งข้อมูลที่ให้มา และไม่มีข้อมูลที่ขัดแย้งหรือไม่ถูกต้อง",
+      "retrieval_latency_ms": 2.111,
+      "reranking_latency_ms": 0.003,
+      "query_rewrite_latency_ms": 0.043
+    },
+    {
+      "item_id": "llm-005",
+      "configuration": "reranking",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล\n\nข้อมูลที่มีอยู่ไม่ได้ระบุวิธีการสำรองข้อมูลสำหรับหนังสืออิเล็กทรอนิกส์อย่างเฉพาะเจาะจง ข้อมูลที่มีอยู่เน้นในเรื่องของการจัดการทะเบียนและบัญชีหนังสือ รวมถึงการเก็บรักษา ยืม และทำลายหนังสือ แต่ไม่ได้กล่าวถึงวิธีการสำรองข้อมูลเฉพาะสำหรับหนังสืออิเล็กทรอนิกส์",
+      "citations_found": [],
+      "known_citations": [],
+      "expected_source_cited": false,
+      "faithfulness": 0,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 0,
+      "hallucination_rate": 0,
+      "abstention_correctness": 0,
+      "rationale": "คำตอบไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูลในการระบุวิธีการสำรองข้อมูลสำหรับหนังสืออิเล็กทรอนิกส์ แต่คำตอบที่ให้มาไม่เกี่ยวข้องกับคำถาม (สำรองข้อมูลไว้อีกแห่ง) ซึ่งทำให้คะแนน faithfulness และ citation_correctness เป็น 0",
+      "retrieval_latency_ms": 4.22,
+      "reranking_latency_ms": 0.794,
+      "query_rewrite_latency_ms": 0.021
+    },
+    {
+      "item_id": "llm-005",
+      "configuration": "conversation_memory",
+      "answerable": true,
+      "question_type": "answerable_specific_source",
+      "generated_answer": "ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล\n\nข้อมูลที่มีอยู่ไม่ได้ระบุวิธีการสำรองข้อมูลสำหรับหนังสืออิเล็กทรอนิกส์อย่างเฉพาะเจาะจง ข้อมูลที่มีอยู่เน้นในเรื่องของการจัดการทะเบียนและบัญชีหนังสือ รวมถึงการเก็บรักษา ยืม และทำลายหนังสือ แต่ไม่ได้กล่าวถึงวิธีการสำรองข้อมูลเฉพาะสำหรับหนังสืออิเล็กทรอนิกส์",
+      "citations_found": [],
+      "known_citations": [],
+      "expected_source_cited": false,
+      "faithfulness": 0,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 0,
+      "hallucination_rate": 0,
+      "abstention_correctness": 0,
+      "rationale": "คำตอบไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูลในการระบุวิธีการสำรองข้อมูลสำหรับหนังสืออิเล็กทรอนิกส์ แต่คำตอบที่ให้มาไม่เกี่ยวข้องกับคำถาม (สำรองข้อมูลไว้อีกแห่ง) ซึ่งทำให้คะแนน faithfulness และ citation_correctness เป็น 0",
+      "retrieval_latency_ms": 1.848,
+      "reranking_latency_ms": 0.558,
+      "query_rewrite_latency_ms": 0.027
+    },
+    {
+      "item_id": "llm-006",
+      "configuration": "baseline_rag",
+      "answerable": false,
+      "question_type": "unanswerable",
+      "generated_answer": "ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล\n\nข้อมูลที่มีอยู่ไม่ได้ระบุชื่อผู้ชนะรางวัลโนเบลปี ๒๕๖๔ ตามระเบียบสำนักนายกรัฐมนตรีว่าด้วยงานสารบรรณ พ.ศ. ๒๕๒๖ ฉบับที่ ๔ พ.ศ. ๒๕๖๔ [S1] หรือข้อบังคับอื่น ๆ ที่เกี่ยวข้อง [S2] และ [S3]",
+      "citations_found": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "known_citations": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "expected_source_cited": false,
+      "faithfulness": 1,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 0,
+      "abstention_correctness": 1,
+      "rationale": "คำตอบถูกต้องตามข้อกำหนดที่ให้มา ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล ไม่มีการสร้างข้อมูลที่ไม่มีอยู่จริง และได้ระบุเหตุผลในการไม่สามารถตอบคำถามได้",
+      "retrieval_latency_ms": 1.616,
+      "reranking_latency_ms": 0.004,
+      "query_rewrite_latency_ms": 0.114
+    },
+    {
+      "item_id": "llm-006",
+      "configuration": "reranking",
+      "answerable": false,
+      "question_type": "unanswerable",
+      "generated_answer": "ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล\n\nข้อมูลที่มีอยู่ไม่ได้ระบุชื่อผู้ชนะรางวัลโนเบลปี ๒๕๖๔ ตามระเบียบสำนักนายกรัฐมนตรีว่าด้วยงานสารบรรณ พ.ศ. ๒๕๒๖ ที่กล่าวถึงในแหล่งข้อมูลที่ให้มา [S1], [S2], และ [S3].",
+      "citations_found": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "known_citations": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "expected_source_cited": false,
+      "faithfulness": 1,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 0,
+      "abstention_correctness": 1,
+      "rationale": "คำตอบถูกต้องตามข้อมูลที่มี และไม่มีการสร้างข้อมูลใหม่ (hallucination) หรือการอ้างอิงที่ไม่ถูกต้อง",
+      "retrieval_latency_ms": 1.678,
+      "reranking_latency_ms": 0.449,
+      "query_rewrite_latency_ms": 0.023
+    },
+    {
+      "item_id": "llm-006",
+      "configuration": "conversation_memory",
+      "answerable": false,
+      "question_type": "unanswerable",
+      "generated_answer": "ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล\n\nข้อมูลที่มีอยู่ไม่ได้ระบุชื่อผู้ชนะรางวัลโนเบลปี ๒๕๖๔ ตามระเบียบสำนักนายกรัฐมนตรีว่าด้วยงานสารบรรณ พ.ศ. ๒๕๒๖ ที่กล่าวถึงในแหล่งข้อมูลที่ให้มา [S1], [S2], และ [S3].",
+      "citations_found": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "known_citations": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "expected_source_cited": false,
+      "faithfulness": 1,
+      "answer_relevance": 1,
+      "context_relevance": 1,
+      "citation_correctness": 1,
+      "hallucination_rate": 0,
+      "abstention_correctness": 1,
+      "rationale": "คำตอบถูกต้องตามข้อมูลที่มี และไม่มีการสร้างข้อมูลใหม่ (hallucination) หรือการอ้างอิงที่ไม่ถูกต้อง",
+      "retrieval_latency_ms": 3.571,
+      "reranking_latency_ms": 0.433,
+      "query_rewrite_latency_ms": 0.014
+    }
+  ],
+  "errors": [],
+  "note": "Scores are null when generation or judging is unavailable; retrieval quality is reported separately by rag_evaluation.json."
+}

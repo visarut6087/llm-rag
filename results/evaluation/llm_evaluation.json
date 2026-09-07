@@ -1,0 +1,108 @@
+{
+  "status": "not_run",
+  "dataset": "thai_sarabun_llm_eval_v1",
+  "annotation_status": "manually_annotated_from_backend/dataset/sarabun 26.txt",
+  "judge_model": "qwen2.5:7b",
+  "metrics": [
+    "faithfulness",
+    "answer_relevance",
+    "context_relevance",
+    "citation_correctness",
+    "hallucination_rate",
+    "abstention_correctness"
+  ],
+  "rows": [],
+  "errors": [
+    {
+      "item_id": "llm-001",
+      "configuration": "baseline_rag",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-001",
+      "configuration": "reranking",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-001",
+      "configuration": "conversation_memory",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-002",
+      "configuration": "baseline_rag",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-002",
+      "configuration": "reranking",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-002",
+      "configuration": "conversation_memory",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-003",
+      "configuration": "baseline_rag",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-003",
+      "configuration": "reranking",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-003",
+      "configuration": "conversation_memory",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-004",
+      "configuration": "baseline_rag",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-004",
+      "configuration": "reranking",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-004",
+      "configuration": "conversation_memory",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-005",
+      "configuration": "baseline_rag",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-005",
+      "configuration": "reranking",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-005",
+      "configuration": "conversation_memory",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-006",
+      "configuration": "baseline_rag",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-006",
+      "configuration": "reranking",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    },
+    {
+      "item_id": "llm-006",
+      "configuration": "conversation_memory",
+      "error": "<urlopen error [Errno 61] Connection refused>"
+    }
+  ],
+  "note": "Scores are null when generation or judging is unavailable; retrieval quality is reported separately by rag_evaluation.json."
+}
