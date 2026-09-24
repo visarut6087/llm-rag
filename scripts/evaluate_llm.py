@@ -94,7 +94,15 @@ def main():
     rows = []
     errors = []
 
-    for item in dataset["items"]:
+    # for item in dataset["items"]:
+    #     current = len(rows) + len(errors) + 1
+    total = len(dataset["items"])
+
+    for index, item in enumerate(dataset["items"], 1):
+        print(f"\n[{index}/{total}] ({index / total * 100:.1f}%) กำลังประเมิน {item['id']} ...", flush=True)
+
+        # print(f"[{current}/{len(dataset['items'])}] กำลังประเมิน {item.get('id', '')} ...", flush=True)
+
         for configuration, use_reranker, use_context in configurations:
             rag_payload = {
                 "prompt": item["question"],

@@ -1,3 +1,5 @@
+import os
+
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,6 +11,23 @@ from db import get_db
 from ingest_dataset import process_dataset_folder
 from reranker import rerank_results
 from query_rewriter import rewrite_query
+
+
+DEFAULT_EVIDENCE_MAX_DISTANCE = 0.22
+
+
+def get_evidence_max_distance() -> float:
+    """Return the configurable cosine-distance cutoff for usable evidence."""
+    try:
+        return float(os.getenv("RAG_EVIDENCE_MAX_DISTANCE", DEFAULT_EVIDENCE_MAX_DISTANCE))
+    except (TypeError, ValueError):
+        return DEFAULT_EVIDENCE_MAX_DISTANCE
+
+
+def is_usable_text_evidence(result: dict, max_distance: float) -> bool:
+    text = (result.get("text") or result.get("content") or "").strip()
+    distance = result.get("retrieval_score")
+    return bool(text) and isinstance(distance, (int, float)) and distance <= max_distance
 
 app = FastAPI(title="Multimodal RAG API Server", version="1.0.0")
 
@@ -27,7 +46,7 @@ class TextIngestRequest(BaseModel):
 class RAGQueryRequest(BaseModel):
     prompt: str
     n_results: Optional[int] = 3
-    use_reranker: bool = True
+    use_reranker: bool = False
     use_query_rewriting: bool = True
     use_citations: bool = True
     # Explicit rewrite-only context. It is not used as factual evidence.
@@ -187,6 +206,17 @@ def query_rag(req: RAGQueryRequest):
             })
 
     text_results = results.get("texts", [])
+    evidence_max_distance = get_evidence_max_distance()
+    evidence_results = [
+        result for result in text_results
+        if is_usable_text_evidence(result, evidence_max_distance)
+    ]
+    evidence_sufficient = bool(evidence_results)
+    evidence_reason = (
+        "usable_text_evidence"
+        if evidence_sufficient
+        else "no_usable_text_evidence_within_distance_cutoff"
+    )
     if req.use_citations:
         text_contexts = [
             "[{citation_id}] source_id={source_id} source_name={source_name} "
@@ -198,16 +228,18 @@ def query_rag(req: RAGQueryRequest):
                 chunk_id=result.get("chunk_id"),
                 text=result.get("text") or result.get("content", ""),
             )
-            for result in text_results
+            for result in evidence_results
         ]
     else:
-        text_contexts = [result.get("text") or result.get("content", "") for result in text_results]
+        text_contexts = [result.get("text") or result.get("content", "") for result in evidence_results]
     images_found = results.get("images", [])
     
     context_str = ""
     if text_contexts:
         citation_rule = " ทุกข้อเท็จจริงที่อ้างจากหลักฐานต้องใส่ citation เช่น [S1] ซึ่งต้องตรงกับ citation_id ที่มีอยู่จริง ห้ามสร้าง citation ใหม่หรืออ้างแหล่งข้อมูลที่ไม่มีในรายการ" if req.use_citations else " ไม่ต้องใส่ citation เพราะการทดลองนี้ปิด citation แต่ห้ามสร้างข้อเท็จจริงนอกหลักฐาน"
         context_str += "\n\n=== ข้อมูลจากคลังความรู้ (RAG Context) ===\n" + "\n---\n".join(text_contexts) + "\n========================================\n*ข้อบังคับสำคัญ*: ประวัติการสนทนาใช้เพื่อทำความเข้าใจคำถามเท่านั้น ไม่ใช่หลักฐานข้อเท็จจริง ตอบโดยอิงจากข้อมูลหลักฐานด้านบนเท่านั้น" + citation_rule + " หากหลักฐานไม่เพียงพอ ให้ตอบว่า 'ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล'"
+    else:
+        context_str = "\n\n=== ข้อมูลจากคลังความรู้ (RAG Context) ===\nไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูลสำหรับตอบคำถามนี้\n========================================\n*ข้อบังคับสำคัญ*: ห้ามใช้ความรู้ทั่วไป ห้ามเดา และให้ตอบเพียงว่า 'ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล'"
         
     if images_found:
         image_contexts = [
@@ -235,6 +267,10 @@ def query_rag(req: RAGQueryRequest):
         "reranking_latency_ms": reranking_latency_ms,
         "total_rag_latency_ms": round((time.perf_counter() - rewrite_started) * 1000, 3),
         "retrieval_score_semantics": "chroma_cosine_distance_lower_is_better",
+        "evidence_max_distance": evidence_max_distance,
+        "evidence_sufficient": evidence_sufficient,
+        "evidence_reason": evidence_reason,
+        "evidence_count": len(evidence_results),
         "rerank_score_semantics": "lexical_overlap_higher_is_better",
         "reranking_enabled": req.use_reranker,
         "candidate_count": candidate_k,

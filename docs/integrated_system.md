@@ -1,17 +1,28 @@
 # Integrated RAG System and Ablation
 
-Phase 8 is enabled by the default `POST /api/rag/query` settings:
+The default `POST /api/rag/query` pipeline keeps baseline vector retrieval and
+uses reranking only when explicitly requested:
 
 ```text
-Conversation memory (rewrite-only)
+Conversation memory (rewrite-only, when needed)
 → Query rewriting
 → ChromaDB retrieval
 → Native relevance distance
-→ Reranking
+→ Evidence sufficiency check
 → Top-N evidence
 → Citation context
 → Grounded generation
 ```
+
+The default request setting is `use_reranker=false`. Evidence is considered
+usable when a non-empty text result has Chroma cosine distance at or below
+`RAG_EVIDENCE_MAX_DISTANCE` (default `0.22`). The value is configurable by
+environment variable and is reported in each RAG response. Results outside the
+cutoff are not placed in the factual answer context; the API returns a Thai
+insufficient-evidence instruction instead. The initial `0.22` value was chosen
+from a smoke check separating one known in-dataset question (distance `0.134`)
+from one unrelated question (distance `0.255`), not tuned on the final
+evaluation output.
 
 The API returns the active `pipeline` and the explicit grounding rule:
 
