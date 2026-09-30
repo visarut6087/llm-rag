@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
 """
-Generate RAG answers only.
+Generate RAG answers.
 
-This script does NOT judge/evaluate the answers.
-It records:
-- model parameters
-- generated answer
-- prompt/output/total token counts
-- latency per evaluation
-- total latency
-- RAG retrieval/reranking/query-rewrite latency
-- retrieved evidence and citations for later independent hallucination evaluation
+Workflow:
+Dataset question
+    -> RAG retrieves context/evidence
+    -> Question + RAG context prompt
+    -> Ollama/AI agent
+    -> new answer
+    -> JSON/CSV output
+
+Requirements:
+- Dataset can be selected at runtime with --dataset.
+- Dataset files are resolved from the fixed dataset_for_train directory when
+  only a filename is supplied.
+- Output is created automatically under the fixed results directory.
+- Every successful item contains: id, answer, hallucination(blank),
+  token counts and latency.
+- Summary contains total tokens and total latency across all successful items.
+- --agent can be specified at runtime and is sent to the RAG API when present.
 """
 
 import argparse
@@ -18,9 +26,15 @@ import csv
 import json
 import re
 import time
+from datetime import datetime
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+
+
+BASE_DIR = Path("/Users/foxixe/Downloads/Test llm /ragtest colab/gemini-ollama-gui")
+DATASET_DIR = BASE_DIR / "scripts" / "dataset_for_train"
+RESULTS_DIR = BASE_DIR / "results"
 
 
 def load_json(path):
@@ -52,39 +66,102 @@ def ollama_chat(base_url, model, messages, temperature=0):
     )
 
     client_latency_ms = round((time.perf_counter() - started) * 1000, 3)
-
     message = response.get("message", {})
+
+    prompt_tokens = response.get("prompt_eval_count")
+    output_tokens = response.get("eval_count")
+
     return {
         "content": message.get("content", ""),
-        "prompt_eval_count": response.get("prompt_eval_count"),
-        "eval_count": response.get("eval_count"),
+        "prompt_eval_count": prompt_tokens,
+        "eval_count": output_tokens,
         "total_tokens": (
-            (response.get("prompt_eval_count") or 0)
-            + (response.get("eval_count") or 0)
-            if response.get("prompt_eval_count") is not None
-            or response.get("eval_count") is not None
+            (prompt_tokens or 0) + (output_tokens or 0)
+            if prompt_tokens is not None or output_tokens is not None
             else None
         ),
+        "client_latency_ms": client_latency_ms,
         "ollama_total_duration_ns": response.get("total_duration"),
         "ollama_load_duration_ns": response.get("load_duration"),
         "ollama_prompt_eval_duration_ns": response.get("prompt_eval_duration"),
         "ollama_eval_duration_ns": response.get("eval_duration"),
-        "client_latency_ms": client_latency_ms,
     }
 
 
-def citation_info(answer, sources):
-    citations = sorted(set(re.findall(r"\[(S\d+)\]", answer or "")))
-    known = {source.get("citation_id"): source for source in sources}
-    return {
-        "citations_found": citations,
-        "known_citations": sorted(citations & known.keys()),
-    }
+def resolve_dataset(dataset_arg):
+    """
+    Accept either:
+      --dataset sarabun-questions-50.json
+    or:
+      --dataset /full/path/to/file.json
+
+    A filename is automatically resolved inside DATASET_DIR.
+    """
+    supplied = Path(dataset_arg).expanduser()
+
+    candidates = []
+    if supplied.is_absolute():
+        candidates.append(supplied)
+    else:
+        candidates.extend([
+            Path.cwd() / supplied,
+            DATASET_DIR / supplied,
+        ])
+
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate.resolve()
+
+    raise FileNotFoundError(
+        "ไม่พบ Dataset:\n"
+        f"  ที่ระบุ: {dataset_arg}\n"
+        f"  ตรวจใน: {DATASET_DIR}\n"
+        "ตัวอย่าง: --dataset sarabun-questions-50.json"
+    )
+
+
+def normalize_items(dataset):
+    if isinstance(dataset, list):
+        items = dataset
+    elif isinstance(dataset, dict):
+        items = dataset.get("items", [])
+    else:
+        raise ValueError(
+            "Dataset JSON ต้องเป็น list หรือ object ที่มี 'items'"
+        )
+
+    if not isinstance(items, list) or not items:
+        raise ValueError("Dataset ไม่มีข้อมูล")
+
+    return items
+
+
+def safe_name(value):
+    return re.sub(r"[^A-Za-z0-9._-]+", "_", str(value)).strip("_") or "output"
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate RAG answers only; no LLM judging."
+        description="Question + RAG context -> Ollama answer generator"
+    )
+
+    parser.add_argument(
+        "--dataset",
+        required=True,
+        help=(
+            "Dataset filename in scripts/dataset_for_train, "
+            "or full path to JSON"
+        ),
+    )
+    parser.add_argument(
+        "--model",
+        required=True,
+        help="Ollama model name, e.g. qwen2.5:7b",
+    )
+    parser.add_argument(
+        "--agent",
+        default="default",
+        help="Agent name to use for this run; sent to RAG API and recorded in output",
     )
     parser.add_argument(
         "--rag-url",
@@ -97,31 +174,10 @@ def main():
         help="Ollama API URL",
     )
     parser.add_argument(
-        "--model",
-        required=True,
-        help="Ollama model name, e.g. qwen2.5:7b",
-    )
-    parser.add_argument(
-        "--dataset",
-        required=True,
-        help="Path to the evaluation dataset JSON",
-    )
-    parser.add_argument(
-        "--output-dir",
-        default=None,
-        help="Output directory. If omitted, uses results/evaluation/<model_name>",
-    )
-    parser.add_argument(
-        "--expected-items",
-        type=int,
-        default=None,
-        help="Optional expected number of dataset items",
-    )
-    parser.add_argument(
         "--n-results",
         type=int,
         default=3,
-        help="Number of RAG results to retrieve",
+        help="Number of RAG results",
     )
     parser.add_argument(
         "--temperature",
@@ -129,336 +185,299 @@ def main():
         default=0,
         help="Ollama temperature",
     )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Run only the first N questions",
+    )
+    parser.add_argument(
+        "--use-reranker",
+        action="store_true",
+        help="Ask RAG API to use reranker",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default=None,
+        help="Optional custom output directory. Default: project/results",
+    )
+
     args = parser.parse_args()
 
-    dataset = load_json(args.dataset)
+    dataset_path = resolve_dataset(args.dataset)
+    dataset = load_json(dataset_path)
+    items = normalize_items(dataset)
 
-    # Validate dataset before starting the expensive generation run.
-    items = dataset.get("items", [])
-    if not isinstance(items, list) or not items:
-        raise ValueError("Dataset must contain a non-empty 'items' list.")
+    if args.limit is not None:
+        if args.limit <= 0:
+            raise ValueError("--limit ต้องมากกว่า 0")
+        items = items[: args.limit]
 
+    if not items:
+        raise ValueError("ไม่มีคำถามสำหรับรัน")
+
+    # Keep the input IDs exactly as supplied by the dataset.
     ids = [item.get("id") for item in items]
-    if any(not item_id for item_id in ids):
-        raise ValueError("Every evaluation item must have an 'id'.")
+    if any(item_id is None for item_id in ids):
+        raise ValueError("ทุกข้อใน Dataset ต้องมี id")
 
     duplicates = sorted({item_id for item_id in ids if ids.count(item_id) > 1})
     if duplicates:
-        raise ValueError(f"Duplicate evaluation item IDs: {duplicates}")
+        raise ValueError(f"พบ id ซ้ำใน Dataset: {duplicates}")
 
-    required_fields = {
-    "id",
-    "question",
-    "answer",
-    }
-
-    missing = []
     for item in items:
-        absent = sorted(required_fields - set(item))
-        if absent:
-            missing.append(
-                f"{item.get('id', '<unknown>')}: {', '.join(absent)}"
-            )
+        if "question" not in item:
+            raise ValueError(f"ข้อ {item.get('id')} ไม่มี field 'question'")
 
-    if missing:
-        raise ValueError("Missing dataset fields: " + " | ".join(missing))
+    output_root = (
+        Path(args.output_dir).expanduser().resolve()
+        if args.output_dir
+        else RESULTS_DIR
+    )
+    output_root.mkdir(parents=True, exist_ok=True)
 
-    if args.expected_items is not None and len(items) != args.expected_items:
-        raise ValueError(
-            f"Expected {args.expected_items} dataset items, "
-            f"but found {len(items)}."
-        )
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    dataset_name = safe_name(dataset_path.stem)
+    model_name = safe_name(args.model)
+    agent_name = safe_name(args.agent)
 
-    model_dir_name = re.sub(r"[^A-Za-z0-9._-]+", "_", args.model)
-    output_dir = Path(args.output_dir or f"results/evaluation/{model_dir_name}")
+    # Each run gets its own directory automatically.
+    output_dir = output_root / f"{dataset_name}__{model_name}__{agent_name}__{timestamp}"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    configurations = [
-        ("baseline_rag", False, False),
-        ("reranking", True, False),
-        ("conversation_memory", True, True),
-    ]
-
-    total_evaluations = len(items) * len(configurations)
-
+    print("=" * 70)
+    print("RAG → Question + Context → AI Answer")
+    print("=" * 70)
+    print(f"Dataset : {dataset_path}")
+    print(f"Questions: {len(items)}")
+    print(f"Model   : {args.model}")
+    print(f"Agent   : {args.agent}")
+    print(f"RAG     : {args.rag_url}")
+    print(f"Ollama  : {args.ollama_url}")
     print(
-        f"Loaded evaluation dataset: {len(items)} questions "
-        f"({total_evaluations} generations)",
-        flush=True,
+        f"Params  : n_results={args.n_results}, "
+        f"temperature={args.temperature}, "
+        f"use_reranker={args.use_reranker}"
     )
-    print(f"Model: {args.model}", flush=True)
-    print(f"Dataset: {args.dataset}", flush=True)
-    print(f"Output: {output_dir}", flush=True)
-    print(
-        f"Parameters: n_results={args.n_results}, "
-        f"temperature={args.temperature}, stream=False",
-        flush=True,
-    )
+    print(f"Output  : {output_dir}")
+    print("=" * 70)
 
     rows = []
     errors = []
     overall_started = time.perf_counter()
 
-    generation_index = 0
-
     for index, item in enumerate(items, 1):
+        item_id = item["id"]
+        question = item["question"]
+        item_started = time.perf_counter()
+
         print(
-            f"\n[{index}/{len(items)}] "
-            f"({index / len(items) * 100:.1f}%) {item['id']} ...",
+            f"\n[{index}/{len(items)}] id={item_id}: {question[:100]}",
             flush=True,
         )
 
-        for configuration, use_reranker, use_context in configurations:
-            generation_index += 1
-            generation_started = time.perf_counter()
-
+        try:
+            # 1) Send ONLY the question to RAG.
             rag_payload = {
-                "prompt": item["question"],
+                "prompt": question,
                 "n_results": args.n_results,
-                "use_reranker": use_reranker,
-                "conversation_context": (
-                    item.get("conversation_context")
-                    if use_context
-                    else []
-                ),
+                "use_reranker": args.use_reranker,
             }
 
-            try:
-                rag = post_json(
-                    f"{args.rag_url.rstrip('/')}/api/rag/query",
-                    rag_payload,
-                )
+            # The RAG server can use the selected agent if its API supports it.
+            if args.agent:
+                rag_payload["agent"] = args.agent
 
-                evidence = rag.get("context_str", "")
-                sources = rag.get("sources", [])
+            rag_started = time.perf_counter()
 
-                # Zero-shot grounding instruction.
-                # No examples are supplied, so this is NOT few-shot.
-                answer_prompt = (
-                    "ตอบคำถามโดยใช้หลักฐาน RAG ด้านล่างเท่านั้น "
-                    "ทุกข้อเท็จจริงต้องอ้าง [S#] ที่มีอยู่จริง "
-                    "หากหลักฐานไม่พอ ให้ตอบว่า "
-                    "'ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล'\n\n"
-                    f"คำถาม: {item['question']}\n"
-                    f"หลักฐาน:\n{evidence}"
-                )
+            rag = post_json(
+                f"{args.rag_url.rstrip('/')}/api/rag/query",
+                rag_payload,
+            )
 
-                llm = ollama_chat(
-                    args.ollama_url,
-                    args.model,
-                    [{"role": "user", "content": answer_prompt}],
-                    temperature=args.temperature,
-                )
+            rag_client_latency_ms = round(
+                (time.perf_counter() - rag_started) * 1000, 3
+            )
 
-                generation_latency_ms = round(
-                    (time.perf_counter() - generation_started) * 1000, 3
-                )
+            context = rag.get("context_str", "")
+            sources = rag.get("sources", [])
 
-                citation_data = citation_info(llm["content"], sources)
+            # 2) Build the final AI prompt from Question + RAG Context.
+            answer_prompt = (
+                "คุณเป็น AI สำหรับตอบคำถามโดยอ้างอิงข้อมูลจาก RAG\n"
+                "ให้ตอบคำถามโดยใช้ข้อมูลจาก Context ด้านล่างเป็นหลัก\n"
+                "ห้ามแต่งข้อมูลที่ไม่มีอยู่ใน Context\n"
+                "หาก Context ไม่มีข้อมูลเพียงพอ ให้ตอบว่า "
+                "'ไม่พบข้อมูลที่เพียงพอจากแหล่งข้อมูล'\n\n"
+                f"Question:\n{question}\n\n"
+                f"Context:\n{context}\n\n"
+                "Answer:"
+            )
 
-                rows.append(
-                    {
-                        "item_id": item["id"],
-                        "configuration": configuration,
-                        "question": item["question"],
-                        "expected_answer": item["answer"],
-                        "generated_answer": llm["content"],
-                        "citations_found": citation_data["citations_found"],
-                        "known_citations": citation_data["known_citations"],
-                        "context_str": evidence,
-                        "sources": json.dumps(
-                            sources, ensure_ascii=False
-                        ),
-                        "model": args.model,
-                        "temperature": args.temperature,
-                        "n_results": args.n_results,
-                        "use_reranker": use_reranker,
-                        "use_conversation_context": use_context,
-                        "prompt_tokens": llm["prompt_eval_count"],
-                        "output_tokens": llm["eval_count"],
-                        "total_tokens": llm["total_tokens"],
-                        "generation_latency_ms": generation_latency_ms,
-                        "ollama_client_latency_ms": llm["client_latency_ms"],
-                        "ollama_total_duration_ns": llm[
-                            "ollama_total_duration_ns"
-                        ],
-                        "ollama_load_duration_ns": llm[
-                            "ollama_load_duration_ns"
-                        ],
-                        "ollama_prompt_eval_duration_ns": llm[
-                            "ollama_prompt_eval_duration_ns"
-                        ],
-                        "ollama_eval_duration_ns": llm[
-                            "ollama_eval_duration_ns"
-                        ],
-                        "retrieval_latency_ms": rag.get(
-                            "retrieval_latency_ms"
-                        ),
-                        "reranking_latency_ms": rag.get(
-                            "reranking_latency_ms"
-                        ),
-                        "query_rewrite_latency_ms": rag.get(
-                            "query_rewrite_latency_ms"
-                        ),
-                        "total_rag_latency_ms": rag.get(
-                            "total_rag_latency_ms"
-                        ),
-                        # Hallucination is intentionally NOT scored here.
-                        # It requires an independent semantic judge.
-                        "hallucination": None,
-                    }
-                )
+            # 3) Send Question + Context prompt to AI.
+            llm = ollama_chat(
+                args.ollama_url,
+                args.model,
+                [{"role": "user", "content": answer_prompt}],
+                temperature=args.temperature,
+            )
 
-                print(
-                    f"  {configuration}: "
-                    f"tokens={llm['total_tokens']} "
-                    f"(in={llm['prompt_eval_count']}, "
-                    f"out={llm['eval_count']}), "
-                    f"latency={generation_latency_ms} ms",
-                    flush=True,
-                )
+            total_item_latency_ms = round(
+                (time.perf_counter() - item_started) * 1000, 3
+            )
 
-            except (
-                URLError,
-                HTTPError,
-                TimeoutError,
-                OSError,
-                ValueError,
-                json.JSONDecodeError,
-            ) as exc:
-                errors.append(
-                    {
-                        "item_id": item["id"],
-                        "configuration": configuration,
-                        "error": str(exc),
-                    }
-                )
-                print(
-                    f"  {configuration}: ERROR - {exc}",
-                    flush=True,
-                )
+            row = {
+                # Exactly the same ID as the input.
+                "id": item_id,
+
+                # New answer generated after Question + RAG Context -> AI.
+                "answer": llm["content"],
+
+                # Intentionally blank for later hallucination evaluation.
+                "hallucination": "",
+
+                # Per-item token information.
+                "prompt_tokens": llm["prompt_eval_count"],
+                "output_tokens": llm["eval_count"],
+                "total_tokens": llm["total_tokens"],
+
+                # Per-item latency.
+                "latency_ms": total_item_latency_ms,
+                "ollama_latency_ms": llm["client_latency_ms"],
+                "rag_latency_ms": rag_client_latency_ms,
+
+                # Run configuration / parameters.
+                "model": args.model,
+                "agent": args.agent,
+                "temperature": args.temperature,
+                "n_results": args.n_results,
+                "use_reranker": args.use_reranker,
+
+                # Keep these for traceability.
+                "question": question,
+                "context": context,
+                "sources": json.dumps(sources, ensure_ascii=False),
+            }
+
+            rows.append(row)
+
+            print(
+                f"  ✓ tokens={llm['total_tokens']} "
+                f"latency={total_item_latency_ms} ms",
+                flush=True,
+            )
+
+        except (
+            URLError,
+            HTTPError,
+            TimeoutError,
+            OSError,
+            ValueError,
+            json.JSONDecodeError,
+        ) as exc:
+            errors.append(
+                {
+                    "id": item_id,
+                    "question": question,
+                    "error": str(exc),
+                }
+            )
+            print(f"  ✗ ERROR: {exc}", flush=True)
 
     total_latency_ms = round(
         (time.perf_counter() - overall_started) * 1000, 3
     )
 
-    def sum_numeric(field):
+    def numeric_sum(field):
         values = [
             row[field]
             for row in rows
             if isinstance(row.get(field), (int, float))
         ]
-        return sum(values) if values else None
+        return round(sum(values), 3) if values else None
+
+    successful = len(rows)
+
+    # Requested run-level metrics.
+    total_prompt_tokens = numeric_sum("prompt_tokens")
+    total_output_tokens = numeric_sum("output_tokens")
+    total_tokens = numeric_sum("total_tokens")
+    total_item_latency_ms = numeric_sum("latency_ms")
 
     summary = {
         "model": args.model,
-        "dataset": str(args.dataset),
-        "output_dir": str(output_dir),
-        "dataset_name": dataset.get("dataset_name"),
-        "annotation_status": dataset.get("annotation_status"),
-        "total_questions": len(items),
-        "configurations": [name for name, _, _ in configurations],
-        "expected_generations": total_evaluations,
-        "successful_generations": len(rows),
-        "errors": len(errors),
+        "agent": args.agent,
         "parameters": {
             "model": args.model,
+            "agent": args.agent,
             "temperature": args.temperature,
-            "stream": False,
             "n_results": args.n_results,
+            "use_reranker": args.use_reranker,
+            "stream": False,
             "rag_url": args.rag_url,
             "ollama_url": args.ollama_url,
-            "configurations": {
-                "baseline_rag": {
-                    "use_reranker": False,
-                    "use_conversation_context": False,
-                },
-                "reranking": {
-                    "use_reranker": True,
-                    "use_conversation_context": False,
-                },
-                "conversation_memory": {
-                    "use_reranker": True,
-                    "use_conversation_context": True,
-                },
-            },
         },
-        "tokens_total": {
-            "prompt_tokens": sum_numeric("prompt_tokens"),
-            "output_tokens": sum_numeric("output_tokens"),
-            "total_tokens": sum_numeric("total_tokens"),
+        "dataset": {
+            "path": str(dataset_path),
+            "name": dataset_path.name,
+            "questions_requested": len(items),
+            "questions_completed": successful,
+            "errors": len(errors),
         },
-        "latency_total_ms": total_latency_ms,
-        "latency_average_per_generation_ms": (
-            round(total_latency_ms / len(rows), 3) if rows else None
-        ),
-        "hallucination": (
-            "not_scored"
-        ),
-        "hallucination_note": (
-            "This generation-only script does not determine hallucination. "
-            "The generated answer, question, retrieved evidence, and sources "
-            "are saved so hallucination can be evaluated independently later."
-        ),
+        "hallucination": "",
+        "token": {
+            "prompt_tokens_total": total_prompt_tokens,
+            "output_tokens_total": total_output_tokens,
+            "total_tokens": total_tokens,
+        },
+        "latency": {
+            "total_item_latency_ms": total_item_latency_ms,
+            "total_run_latency_ms": total_latency_ms,
+        },
         "rows": rows,
         "errors_detail": errors,
     }
 
-    (output_dir / "rag_generation.json").write_text(
+    json_path = output_dir / "answers.json"
+    csv_path = output_dir / "answers.csv"
+
+    json_path.write_text(
         json.dumps(summary, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 
-    csv_rows = rows + errors
     fieldnames = (
-        sorted({key for row in csv_rows for key in row})
-        if csv_rows
-        else ["item_id", "configuration", "error"]
+        list(rows[0].keys())
+        if rows
+        else ["id", "answer", "hallucination"]
     )
 
-    with (output_dir / "rag_generation.csv").open(
-        "w", encoding="utf-8", newline=""
-    ) as handle:
+    with csv_path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(csv_rows)
+        writer.writerows(rows)
 
-    print("\n===== SUMMARY =====", flush=True)
-    print(f"Model: {args.model}", flush=True)
-    print(
-        f"Generations: {len(rows)}/{total_evaluations}",
-        flush=True,
-    )
-    print(
-        f"Prompt tokens: {sum_numeric('prompt_tokens')}",
-        flush=True,
-    )
-    print(
-        f"Output tokens: {sum_numeric('output_tokens')}",
-        flush=True,
-    )
-    print(
-        f"Total tokens: {sum_numeric('total_tokens')}",
-        flush=True,
-    )
-    print(f"Total latency: {total_latency_ms} ms", flush=True)
-    print(
-        f"Average latency/generation: "
-        f"{summary['latency_average_per_generation_ms']} ms",
-        flush=True,
-    )
-    print("Hallucination: not scored", flush=True)
-    print(f"Saved: {output_dir}", flush=True)
+    print("\n" + "=" * 70)
+    print("SUMMARY")
+    print("=" * 70)
+    print(f"Model                  : {args.model}")
+    print(f"Agent                  : {args.agent}")
+    print(f"Questions              : {len(items)}")
+    print(f"Completed              : {successful}")
+    print(f"Errors                 : {len(errors)}")
+    print(f"Hallucination          : (blank)")
+    print(f"Prompt tokens (total)  : {total_prompt_tokens}")
+    print(f"Output tokens (total)  : {total_output_tokens}")
+    print(f"Tokens (total)         : {total_tokens}")
+    print(f"Latency items (total)  : {total_item_latency_ms} ms")
+    print(f"Latency run (total)    : {total_latency_ms} ms")
+    print(f"JSON                   : {json_path}")
+    print(f"CSV                    : {csv_path}")
+    print("=" * 70)
 
+    # Return non-zero if at least one item failed.
     return 0 if rows and not errors else (2 if errors else 1)
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-
-
-# !python "/Users/foxixe/Downloads/Test llm /ragtest colab/gemini-ollama-gui/scripts/evaluate_llm_nodb.py" \
-#   --model qwen2.5:7b \
-#   --dataset "/Users/foxixe/Downloads/Test llm /ragtest colab/gemini-ollama-gui/scripts/dataset_for_train/setai20.json" \
-#   --output-dir "/Users/foxixe/Downloads/Test llm /ragtest colab/gemini-ollama-gui/results/evaluation/qwen2.5_7b"
