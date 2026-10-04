@@ -32,7 +32,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
-BASE_DIR = Path("/Users/foxixe/Downloads/Test llm /ragtest colab/gemini-ollama-gui")
+BASE_DIR = Path(__file__).resolve().parent.parent
 DATASET_DIR = BASE_DIR / "scripts" / "dataset_for_train"
 RESULTS_DIR = BASE_DIR / "results"
 
@@ -163,7 +163,7 @@ def extract_citations(answer):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Question + RAG context -> Ollama answer generator"
+        description="Question + RAG context -> Ollama answer generator (Windows/RTX 3070 Ti)"
     )
 
     parser.add_argument(
