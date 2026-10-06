@@ -212,11 +212,11 @@ def main():
         default=None,
         help="Run only the first N questions",
     )
-    parser.add_argument(
-        "--use-reranker",
-        action="store_true",
-        help="Ask RAG API to use reranker",
-    )
+    # parser.add_argument(
+    #     "--use-reranker",
+    #     action="store_true",
+    #     help="Ask RAG API to use reranker",
+    # )
     parser.add_argument(
         "--output-dir",
         default=None,
@@ -278,7 +278,7 @@ def main():
     print(
         f"Params  : n_results={args.n_results}, "
         f"temperature={args.temperature}, "
-        f"use_reranker={args.use_reranker}"
+        # f"use_reranker={args.use_reranker}"
     )
     print(f"Output  : {output_dir}")
     print("=" * 70)
@@ -302,7 +302,7 @@ def main():
             rag_payload = {
                 "prompt": question,
                 "n_results": args.n_results,
-                "use_reranker": args.use_reranker,
+                # "use_reranker": args.use_reranker,
             }
 
             # The RAG server can use the selected agent if its API supports it.
@@ -382,7 +382,7 @@ def main():
                 "agent": args.agent,
                 "temperature": args.temperature,
                 "n_results": args.n_results,
-                "use_reranker": args.use_reranker,
+                # "use_reranker": args.use_reranker,
 
                 # Keep these for traceability.
                 "question": question,
@@ -443,7 +443,7 @@ def main():
             "agent": args.agent,
             "temperature": args.temperature,
             "n_results": args.n_results,
-            "use_reranker": args.use_reranker,
+            # "use_reranker": args.use_reranker,
             "stream": False,
             "rag_url": args.rag_url,
             "ollama_url": args.ollama_url,
