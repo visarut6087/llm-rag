@@ -36,14 +36,9 @@ def process_dataset_folder(dataset_dir: str = None) -> dict:
                     
                     if content:
                         paragraphs = [p.strip() for p in content.split("\n\n") if p.strip()]
-                        for index, p in enumerate(paragraphs, start=1):
+                        for p in paragraphs:
                             vec = embedder.embed_text(p)
-                            db.add_text(
-                                text=p,
-                                embedding=vec,
-                                source_name=file,
-                                chunk_id=f"{file}#chunk-{index}",
-                            )
+                            db.add_text(text=p, embedding=vec, source_name=file)
                             processed_texts += 1
                         print(f"  [Text] Ingested: {file} ({len(paragraphs)} chunks)")
 
